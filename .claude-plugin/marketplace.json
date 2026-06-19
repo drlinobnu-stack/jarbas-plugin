@@ -1,5 +1,5 @@
 {
-  "name": "jarbas-lino",
+  "name": "jarbas-local",
   "owner": {
     "name": "Francisco Salvador Brod Lino"
   },
@@ -9,5 +9,8 @@
       "source": "./jarbas",
       "description": "Agente Jarbas: pré-laudos periciais (previdenciário, interdição, medicamentos, securitário) e pós-perícia do Dr. Francisco Salvador Brod Lino."
     }
-  ]
+  ],
+  "metadata": {
+    "description": "Cópia LOCAL de contingência do Jarbas nesta máquina (uso offline, sem a rede das perícias)."
+  }
 }
