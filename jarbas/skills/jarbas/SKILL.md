@@ -36,13 +36,16 @@ Diferenças entre as famílias: identificação (réu), finalidade, metodologia,
 | Skill | Comando | Script | Memória |
 |---|---|---|---|
 | Completar laudo com exames da perícia | `/jarbas-completar` | `completar_laudo.py` | [[completar-laudo]] |
+| Manifestação a impugnação + quesitos complementares | `/jarbas-impugnacao` | `gerar_manifestacao.py` | [[impugnacao-quesitos]] |
 
 Lê o JPG/imagem do exame ou documento que o autor trouxe na perícia e o insere nas tabelas de Exames e/ou Atestados do laudo já pronto, sem mexer no resto. Ciente de estilo: funciona nos laudos Word do Dr. (converter .doc → .odt com LibreOffice antes) e nos ODT do JARBAS; localiza as tabelas pelo cabeçalho e clona os estilos do próprio documento; dedup evita duplicar em re-execução.
+
+`/jarbas-impugnacao` (pós-laudo): redige a manifestação do perito sobre a impugnação ao laudo e responde aos quesitos complementares das partes (autor, INSS/réu, juízo), no formato/timbre padrão. Ordem fixa: PRIMEIRO os quesitos complementares, DEPOIS a manifestação. Referências bibliográficas SEMPRE como notas de rodapé, no ponto da citação. Linha de endereçamento ao Juízo SEMPRE em maiúsculas; bloco de qualificação do perito à esquerda e justificado; assinatura centralizada.
 
 ### Planejadas (a criar)
 
 - Discussão / Conclusão do laudo após o exame.
-- Resposta aos quesitos (juízo, autor, réu).
+- Resposta aos quesitos originais (juízo, autor, réu) na entrega do laudo.
 
 ## Roteamento automático por tipo (prelaudo_um.sh)
 
