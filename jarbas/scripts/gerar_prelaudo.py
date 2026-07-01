@@ -455,7 +455,7 @@ def add_header_footer(styles_xml, numero):
         'fo:margin-bottom="0.15in"/>'
         '</style:header-style>'
         '<style:footer-style>'
-        '<style:header-footer-properties fo:min-height="0.2in" fo:margin-top="0.15in"/>'
+        '<style:header-footer-properties fo:min-height="0.2in" fo:margin-top="0.3in"/>'
         '</style:footer-style>'
         '</style:page-layout>'
     )
@@ -498,6 +498,9 @@ def add_header_footer(styles_xml, numero):
 
     footer_xml = (
         '<style:footer>'
+        # linha em branco acima do texto do rodapé, para o corpo não colar no rodapé
+        # (é conteúdo, então sobrevive a uma reedição no LibreOffice, ao contrário da margem)
+        '<text:p text:style-name="FooterPL"/>'
         f'<text:p text:style-name="FooterPL">Laudo Pericial – RT {x(numero)}</text:p>'
         '</style:footer>'
     )

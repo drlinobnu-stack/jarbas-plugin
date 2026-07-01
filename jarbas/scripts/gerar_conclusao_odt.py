@@ -450,6 +450,27 @@ def _escrever_odt(saida, base):
                 z.writestr(name, data)
 
 
+def folga_rodape(styles_xml):
+    """Garante 1 linha em branco acima do texto do rodapé ('Laudo Pericial – RT ...'),
+    para o corpo do laudo não colar no rodapé. Idempotente. A linha em branco é conteúdo,
+    então sobrevive a uma reedição no LibreOffice (ao contrário da margem do footer)."""
+    alvo = None
+    for m in re.finditer(r'<style:footer>.*?</style:footer>', styles_xml, re.DOTALL):
+        if 'Laudo Pericial' in m.group(0):
+            alvo = m
+            break
+    if not alvo:
+        return styles_xml, "rodapé: footer 'Laudo Pericial' não localizado (mantido)"
+    inner = alvo.group(0)[len('<style:footer>'):-len('</style:footer>')]
+    if re.match(r'\s*<text:p\b[^>]*/>', inner):
+        return styles_xml, "rodapé: folga já presente"
+    est = re.search(r'text:style-name="([^"]+)"', inner)
+    estn = est.group(1) if est else 'FooterPL'
+    novo = '<style:footer><text:p text:style-name="%s"/>%s</style:footer>' % (estn, inner)
+    styles_xml = styles_xml[:alvo.start()] + novo + styles_xml[alvo.end():]
+    return styles_xml, "rodapé: folga adicionada (1 linha em branco)"
+
+
 def gerar(laudo, conclusao, respostas, saida, data_hoje=None, autos=""):
     data_hoje = data_hoje or data_hoje_extenso()
     with zipfile.ZipFile(laudo) as z:
@@ -490,6 +511,11 @@ def gerar(laudo, conclusao, respostas, saida, data_hoje=None, autos=""):
         ctx = content.split('\n')[ln - 1][max(0, col - 80):col + 120]
         print(f"ERRO XML linha {ln}: {e}\n  Contexto: {ctx[:200]}")
         sys.exit(1)
+
+    if 'styles.xml' in base:
+        st, msg_rod = folga_rodape(base['styles.xml'].decode('utf-8'))
+        base['styles.xml'] = st.encode('utf-8')
+        logs.append("  " + msg_rod)
 
     base['content.xml'] = content.encode('utf-8')
     _escrever_odt(saida, base)
