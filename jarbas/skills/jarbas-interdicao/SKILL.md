@@ -112,7 +112,9 @@ Valide a integridade (`unzip -t`). Para conferência visual, converta com LibreO
 
 ### Passo 5 — Salvar na subpasta dos autos
 
-Salvar o ODT como `PreLaudo_[numero do processo].odt` na MESMA subpasta do Google Drive dos autos. Em sessão interativa, confirmar com o usuário antes de salvar; na automação noturna autorizada, salvar direto.
+Salvar o ODT como `PreLaudo_[numero do processo]_[NOME DO AUTOR].odt` (SEMPRE inclua o nome do autor/periciado/interditando extraído dos autos) na MESMA subpasta do Google Drive dos autos. Em sessão interativa, confirmar com o usuário antes de salvar; na automação noturna autorizada, salvar direto.
+
+Antes de dar o pré-laudo como pronto, rode SEMPRE o subagente `revisor-laudo` sobre o ODT e corrija o que ele apontar (repita até o veredito PRONTO). Etapa obrigatória, nunca pular.
 
 ---
 

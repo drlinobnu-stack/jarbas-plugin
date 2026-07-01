@@ -81,6 +81,22 @@ O MAIOR PDF da pasta são os autos; PDFs menores são exames/laudos avulsos. Use
 }
 ```
 
+### Passo 3.1 — Redação da anamnese (campo `historico`)
+
+A anamnese (campo `historico`) deve SEMPRE começar dizendo se o caso é de ACIDENTE ou de DOENÇA (na securitária, quase sempre acidente pessoal coberto pelo seguro).
+
+**Se ACIDENTE**, redija exatamente neste formato (adaptando os colchetes ao que consta nos autos):
+
+> "Refere o autor(a) que teve acidente de [moto / carro / trabalho / queda / etc.] em [dd.mm.aaaa], [circunstância: ex. 'ao se deslocar do trabalho para casa' ou 'de casa para o trabalho', no acidente de trajeto; ou 'durante a atividade laboral', no acidente típico]. Teve [fratura / lesão de ...] de [segmento anatômico]. Trabalhava na época como [função], [profissiografia da função]. Esteve em benefício entre [dd.mm.aaaa] e [dd.mm.aaaa]."
+
+**Se DOENÇA**, redija exatamente neste formato (adaptando os colchetes ao que consta nos autos):
+
+> "Refere o autor(a) que possui quadro de [diagnóstico] (CID [X]), [início e evolução dos sintomas]. Trabalhava na época como [função], [profissiografia da função]. Esteve em benefício entre [dd.mm.aaaa] e [dd.mm.aaaa]."
+
+Em **[profissiografia da função]**, descreva a PROFISSIOGRAFIA: a sequência concreta de tarefas que a pessoa executava no cargo, NÃO os movimentos. Exemplo (estampador): "Trabalhava como estampador, colocava as peças de malha no berço aquecido, após pegava o bastidor e ia estampando cada peça com o uso do rack, após as peças estampadas auxiliava a retirada das mesmas dos berços."
+
+Regras: datas sempre em dd.mm.aaaa; usar apenas o que consta nos autos; o que faltar, registrar em `alertas`, nunca inventar.
+
 ### Passo 4 — Gerar o ODT
 ```bash
 python3 ~/.claude/scripts/gerar_prelaudo_securitaria.py /tmp/prelaudo_sec_[numero].json /tmp/PreLaudo_[numero].odt
@@ -88,7 +104,10 @@ python3 ~/.claude/scripts/gerar_prelaudo_securitaria.py /tmp/prelaudo_sec_[numer
 Valide (`unzip -t`) e confira visualmente (LibreOffice headless + render).
 
 ### Passo 5 — Salvar na subpasta dos autos
-`PreLaudo_[numero].odt` na MESMA subpasta do Google Drive. Em sessão interativa, confirmar antes de salvar; na automação noturna, salvar direto.
+`PreLaudo_[numero]_[NOME DO AUTOR].odt` (SEMPRE inclua o nome do autor/periciado extraído dos autos no nome do arquivo) na MESMA subpasta do Google Drive. Em sessão interativa, confirmar antes de salvar; na automação noturna, salvar direto.
+
+### Passo 6 — Revisão final obrigatória
+Antes de dar o pré-laudo como pronto, rode SEMPRE o subagente `revisor-laudo` sobre o ODT e corrija o que ele apontar (repita até o veredito PRONTO). Etapa obrigatória, nunca pular.
 
 ---
 
