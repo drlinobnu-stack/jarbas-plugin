@@ -84,6 +84,16 @@ O arquivo entregue é sempre o laudo inteiro em .odt — nunca apenas seções i
 
 ---
 
+## REGRA ABSOLUTA E GLOBAL: LÉXICO PROIBIDO (respostas e conclusão)
+
+> **Não usar "objetiva-se" nem "objetivar"** (nem as conjugações objetivada, objetivado, objetivou, objetivam...). Trocar SEMPRE por **"observa-se" / "observar"** (observada, observado, observou). O adjetivo/substantivo "objetivo/objetiva" (ex.: "resposta objetiva", "o objetivo da perícia") continua permitido. O `gerar_conclusao_odt.py` já faz a troca automática nas RESPOSTAS (função `objetivar_para_observar`, dentro de `proc_texto`); na conclusão redigida à mão, evitar o termo. Confirmado pelo Dr. em 10/07/2026.
+>
+> **Não usar "residual"** para qualificar incapacidade ou sequela quando NÃO há sequela nem incapacidade. Tecnicamente, "residual" afirma que EXISTE uma sequela/incapacidade, porém menor que 10% da função do segmento avaliado. Só cabe "residual" quando de fato há essa pequena perda comprovada; nos casos SEM qualquer sequela (Modelos 3, 4 e 5), nunca escrever "sequela residual" nem "incapacidade residual" — usar "sem sequela", "sem redução da capacidade laborativa" ou "restituição integral", conforme o caso. Confirmado pelo Dr. em 10/07/2026.
+>
+> **Grafia "Estresse" (nunca "Estress"):** nos testes de estabilidade do joelho, escrever SEMPRE "Estresse em varo" / "Estresse em valgo" (com o "e" final), nunca "Estress". Vale para qualquer laudo/exame que passe pelas mãos de Claude: ao encontrar "Estress em varo/valgo" no exame físico digitado pelo Dr., corrigir para "Estresse em varo/valgo". Confirmado pelo Dr. em 03/08/2026 (laudo Leomar). O `gerar_conclusao_odt.py` já faz a troca (função `normalizar_termos`), e o revisor-laudo aponta a grafia "Estress" como correção obrigatória, não observação menor.
+
+---
+
 ## Quando acionar
 
 - Comando `/jarbas-conclusao` (ou pelo app SIMAS, área Perícia judicial > Conclusão)
@@ -174,13 +184,76 @@ Execute os passos em ordem. Não pule etapas.
 5. Indexar informações adicionais relevantes: histórico médico, atestados,
    laudos de peritos anteriores, registros de CAT (Comunicação de Acidente de Trabalho).
 
+6. **Anexos ESCANEADOS: varredura obrigatória (nunca pular).** Boa parte dos autos
+   (prontuários hospitalares, AIH, termos de consentimento, agendamentos de cirurgia,
+   fichas de SAMU e de pronto-socorro) vem como IMAGEM, sem camada de texto. Esse
+   material não aparece em nenhuma busca por palavra e é justamente onde costuma estar
+   o documento que decide o caso. Procedimento:
+
+   a) Listar as páginas do PDF que têm menos de ~120 caracteres de texto extraível
+      (`page.get_text()` do PyMuPDF): são as escaneadas.
+   b) Renderizar essas páginas em FOLHAS DE CONTATO 3x3, a ~70 dpi, com o número da
+      folha escrito em cada miniatura, e ler por visão. É rápido e cobre dezenas de
+      páginas em poucas leituras.
+   c) Reabrir em ALTA resolução (>= 250 dpi, recortando a região de interesse) somente
+      as folhas que interessarem, para transcrever datas e frases com exatidão.
+   d) Nunca transcrever de memória nem "por dedução" do que a miniatura sugere: a frase
+      citada no laudo tem de vir da leitura em alta resolução.
+
+   Priorizar os documentos com data IMEDIATAMENTE ANTERIOR ao fato discutido
+   (AIH, agendamento de cirurgia, termo de consentimento, encaminhamento, receita):
+   são eles que estabelecem o estado clínico prévio.
+
+7. **QUESITOS SUPERVENIENTES: conferir o processo NO DIA da redação (regra do Dr., 28.08.2026).**
+   O PDF dos autos que instruiu o pré-laudo foi baixado semanas antes; nesse intervalo as partes
+   podem ter protocolado quesitos. Antes de escrever a seção 8, abrir o processo no eproc e olhar
+   os EVENTOS, procurando **APRESENTAÇÃO DE QUESITOS** (ou petição com quesitos) de qualquer das
+   partes com data posterior à do PDF baixado. Quesitos do autor vêm por ADVOGADO (com OAB); os do
+   INSS, por procurador federal (em regra o INSS só peticiona honorários e não apresenta quesitos).
+
+   Ao escrever que não há quesitos, **datar a afirmação e nomear o evento**: "Consultados os autos
+   eletrônicos até o evento N, de DD.MM.AAAA, não foram localizados quesitos apresentados pela parte
+   autora." Isso cria uma âncora verificável, que a etapa de entrega vai conferir contra o último
+   evento real ([[entregar-laudo-eproc]], [[sisperjud]]) — e é o que impede a peça de ser protocolada
+   negando quesitos que já estão nos autos.
+
+   Caso que originou a regra: [[caso-jean-rafael-brauvers-quesitos-autor-tardios]] — laudo pronto
+   afirmando não haver quesitos do autor (autos consultados até o evento 27, de 02.07.2026), com 15
+   quesitos protocolados no evento 28, de 12.08.2026, dirigidos contra a conclusão. Respondê-los
+   depois custou 5 folhas a mais e uma recontagem da seção 9.
+
+8. **Ação de CONVERSÃO ou reativação: o laudo de OUTRO processo vem encartado.** Nesses autos o
+   PDF costuma trazer o laudo do perito do processo anterior, com os quesitos daquela perícia.
+   Os quesitos a responder são os do processo ATUAL, transcritos no pré-laudo pela secretária; os
+   do laudo antigo já foram respondidos lá e não entram. Só acrescentar dos autos o quesito que
+   for inequivocamente do processo atual. Ao delegar a leitura dos autos a um subagente, exigir a
+   PROVENIÊNCIA de cada bloco de quesitos (evento, folha e processo) antes de aceitar o relatório.
+   Caso que originou a regra: Marlene Sandoval, Rio do Sul, 07.08.2026 (o subagente devolveu 6
+   quesitos do juízo e 16 do réu, todos do laudo antigo).
+
+9. **Perícias administrativas do INSS: ler a DID, a DII e o CID de cada benefício ANTES de firmar
+   nexo com o acidente.** Uma conclusão ditada como "sequela pós acidente" pode conflitar com a
+   cronologia documentada: no caso Luiz Eduardo Lopes (21.08.2026) a perda visual tinha DID 2018 e
+   DII 11.10.2019, anteriores ao acidente de 2021. Se a origem da sequela for anterior ao acidente,
+   tratar como pré-existente e só admitir concausa com agravamento demonstrável (ver a Regra 25),
+   sempre com nota do componente pré-existente. Divergência entre a instrução recebida e os autos é
+   ponto de PARAR e confirmar com o Dr., nunca de acomodar o texto.
+
+10. **Formulários de duas colunas do INSS (laudo SABI, comunicação de decisão, CAT, espelho de
+   benefício) só se afirmam depois de ler a PÁGINA COMO IMAGEM.** A extração de texto embaralha
+   rótulo e valor e produz afirmação falsa com cara de citação exata (no caso Jean Brauvers,
+   27.08.2026, o "NÃO" atribuído ao campo "Auxílio Acidente" era da linha "Sug. de Apos. por
+   Invalidez"). Antes de citar qualquer campo desses formulários na Discussão ou numa resposta,
+   renderizar a página e ler o par rótulo-valor na imagem; se a imagem não resolver, citar o que é
+   verificável por outra via (Declaração de Benefícios, espécie e DCB) em vez do campo.
+
 ### Passo 4 — VERIFICAÇÕES E CORREÇÕES AUTOMÁTICAS OBRIGATÓRIAS
 
 Executar todas antes de redigir a conclusão. Registrar cada correção.
 
 #### 4.1 — Data da página 1
 
-1. Localizar a data na página 1 (formato: "Cidade, DD de mês de AAAA").
+1. Localizar a data na página 1 (formato: "Cidade, DD de Mês de AAAA", mês em MAIÚSCULA, por extenso).
 2. Comparar com a data de hoje.
 3. Se diferentes, atualizar para a data atual por extenso.
 4. Registrar: "Data corrigida de [original] para [atual]" ou "Data confirmada".
@@ -194,6 +267,17 @@ Executar todas antes de redigir a conclusão. Registrar cada correção.
    - Concordância grosseiramente errada
 2. Corrigir diretamente no documento.
 3. Registrar lista resumida.
+
+#### 4.2b — Remover a tabela de Exames (4.2) quando NÃO há exames nos autos (automático)
+
+Se não houver exames complementares juntados aos autos, a subseção "4.2. Exames
+complementares:" não pode ficar com a tabela vazia (só os cabeçalhos DATA/EXAME/Nº
+Folha/CONCLUSÃO). O `gerar_conclusao_odt.py` remove sozinho o título e a tabela vazia e
+renumera as subseções seguintes do item 4 (4.3 Benefícios vira 4.2), na função
+`remover_tabela_exames_vazia`. A renumeração só age ANTES da seção 5, portanto não toca
+nas alternativas 4.1/4.2/4.3/4.4 do Quesito 4 do réu (seção 8.3). Havendo exame, a
+tabela é mantida. Regra do Dr., confirmar no revisor. Ver
+[[feedback_sem_exames_apagar_tabela]].
 
 #### 4.3 — Número de páginas nas Considerações Finais (contagem automática)
 
@@ -220,10 +304,46 @@ não modifica o texto existente do laudo quanto a travessões.
 A proibição de travessões aplica-se SOMENTE ao texto NOVO inserido por
 Claude (conclusão redigida e respostas aos quesitos).
 
+#### 4.6 — COBERTURA: toda condição com valoração na seção 4 foi examinada e endereçada?
+
+Listar as patologias e sequelas que os documentos da seção 4 trazem COM valoração ou grau
+(atestado com "redução de 50% do pé", laudo de perícia anterior com percentual, benefício de
+outra lesão) e conferir, uma a uma, se (a) o segmento foi examinado na seção 6 e (b) a condição
+foi tratada na conclusão ou nos quesitos. Segmento documentado com sequela e NÃO examinado: não
+inventar achado; redigir a conclusão só sobre o que foi examinado e SINALIZAR ao Dr. antes de
+fechar, para ele decidir se complementa o exame. Caso Jefferson Rudolf (31.07.2026): atestado de
+50% do pé esquerdo na 4.1 e exame só de ombro e punho. O revisor-laudo confere o mesmo ponto.
+
+#### 4.7 — Laudo vindo de .doc (fora do template do JARBAS): checklist próprio
+
+Converter para ODT antes de qualquer edição e conferir: IMC (o campo costuma vir "1" ou vazio),
+dados bancários atuais (Ag. 0411, não 3954), contagem de folhas ("xxx"), e os campos "Resposta:"
+vazios com variação de espaçamento (o regex de preenchimento tolera "Resposta:" com e sem espaço).
+Ver também a Regra 30 (cabeçalho). Caso Luiz Eduardo Lopes, 21.08.2026.
+
+#### 4.8 — Integridade do cabeçalho em ODT que foi reaberto no Office
+
+Todo laudo que passou por abrir/salvar no OpenOffice ou no Word antes de chegar aqui pode ter
+perdido o logo mantendo o frame vazio. Antes de finalizar, conferir no styles.xml: `<draw:image>`
+com `xlink:href` não vazio, o PNG presente no zip (Pictures/) e a entrada no manifest. O
+`gerar_conclusao_odt.py` roda o `restaurar_logo.py` no fim, mas o diagnóstico manual vale quando
+o Dr. disser "o cabeçalho sumiu". Regra 30 traz o que sobrevive e o que não sobrevive ao editor.
+
 ### Passo 5 — Redigir a Discussão e Conclusão
 
 Redigir o texto completo da seção "Discussão / Conclusão" seguindo **exatamente**
 o estilo do Dr. Francisco Lino, conforme os laudos modelo.
+
+> **SISPERJUD: a seção chama-se "Observações", não "Discussão / Conclusão".** Regra do
+> Dr. 24.08.2026 (pauta Guabiruba). Nas comarcas que entregam por SISPERJUD (Gaspar,
+> Guabiruba, Rio do Sul, Timbó e outras que a nomeação indicar), a conclusão formal
+> (enquadramento, DID, DCB, consolidação) é lançada nos campos estruturados da
+> plataforma; no ODT o item narrativo é intitulado **"Observações"**. Portanto: (a) o
+> título do item vira "N. Observações:" em vez de "N. Discussão / Conclusão:"; e (b) as
+> referências nas respostas aos quesitos passam de "vide item Discussão e Conclusão
+> deste laudo" para **"vide item Observações deste laudo"**. O texto (o raciocínio
+> médico) permanece o mesmo, só muda o rótulo. No eproc (não SISPERJUD) mantém-se
+> "Discussão / Conclusão". Ainda NÃO automatizado nos geradores.
 
 **PRIMEIRO: identificar o tipo de incapacidade** a partir do exame físico, diagnóstico
 e indicações do próprio Dr. Lino no laudo (ele frequentemente deixa uma nota como
@@ -317,8 +437,11 @@ ATENÇÃO: NÃO especificar alínea. Apenas "quadro 6". Sem dois-pontos no final
    (Nota: usar "afastamento" em vez de "acidente" para doença profissional)
 
 3. Consolidação — formato EXATO validado (3 parágrafos separados):
-   Parágrafo a: "3.Quanto a Consolidação:"
-   (Nota: "Quanto a" sem acento em "a". "3." colado ao "Quanto".)
+   Parágrafo a: "3. Quanto à Consolidação:"
+   (Nota: LEVA CRASE: "Quanto à" (teste: "Quanto ao diagnóstico" -> "Quanto à
+   consolidação"). Espaço após o "3.", igual aos itens 1 e 2. Corrigido pelo Dr.
+   em 16/07/2026, laudo George Lucio Fortes; o formato antigo "3.Quanto a" sem
+   crase e colado estava errado.)
    Parágrafo b: "- Segundo a ABMLPM na descrição de Conceitos Médicos Legais da Tabela
    Brasileira para Apuração do Dano corporal, temos que:"
    (ATENÇÃO: o parágrafo começa com "- Segundo", com hífen e espaço antes de "Segundo")
@@ -328,7 +451,7 @@ ATENÇÃO: NÃO especificar alínea. Apenas "quadro 6". Sem dois-pontos no final
    permanente."
    (ATENÇÃO: SEM hífen antes de "Consolidação" — diferente do parágrafo b que TEM "- Segundo")
    Parágrafo d: "No caso em tela, estima-se a consolidação do quadro na DCB, em
-   [data], pelo critério da compatibilidade anátomo clínica."
+   [data], pelo critério da compatibilidade anatomoclínica."
    ATENÇÃO: NÃO colocar "dia" antes da data de consolidação (diferente dos itens 1 e 2).
    **Laudo validado:** Nelson Heinert (junho/2026) — usar como referência definitiva de estrutura e espaçamento.
 
@@ -358,7 +481,9 @@ Exemplos:
 - "[O/A] [autor/autora] já está na fila para o procedimento cirúrgico e estima-se um
   período de mais [prazo] de incapacidade laborativa."
 - "[O/A] [autor/autora] encontra-se em tratamento [clínico/fisioterápico] e estima-se
-  um período de [prazo] para reavaliação."
+  um período de mais [prazo] de incapacidade laborativa."
+  (REGRA Dr. 16.07.2026: na incapacidade total e temporária com prazo definido NÃO há
+  reavaliação pericial; NUNCA escrever "para reavaliação"/"nova avaliação"/"nova perícia".)
 
 **Parágrafo 4 — Afirmação de incapacidade na DCB:**
 Sempre esta construção:
@@ -379,6 +504,87 @@ incapacidade quando da DCB em [data da última DCB documentada]."
 
 ---
 
+## MODELO C — Lesão NÃO CONSOLIDADA (sem valoração da sequela)
+
+Usar quando o periciando ainda está em tratamento (ortopédico, fisioterápico), tem cirurgia
+indicada e não realizada, ou laudos e imagens recentes sem alta. Sem consolidação médico-legal
+não há sequela definitiva a valorar; a conclusão descreve a lesão e documenta a impossibilidade de
+quantificar, remetendo a nova perícia após a alta. Definido pelo Dr. em 15.07.2026 (Divonsir
+Soares dos Santos, luxação recidivante do ombro esquerdo, cirurgia indicada pendente).
+
+Gatilho: tratamento em curso OU cirurgia indicada não realizada OU documentos recentes sem alta.
+
+**Parte 1, descrição da lesão (redação do perito):** mecanismo e data do acidente; diagnóstico
+com CID; síntese do exame físico; síntese dos exames de imagem; situação do tratamento (ex.:
+"cirurgia indicada ainda não realizada").
+
+**Parte 2, texto padrão FIXO do Dr. (reproduzir literalmente):**
+
+> "Considerando-se que não houve 'consolidação médico legal das lesões traumáticas', ou seja, o
+> periciado não encerrou o tratamento médico (ortopédico) e fisioterápico, apresenta-se como
+> impossível a quantificação de eventual grau de sequela pós-traumática permanente."
+
+> "Obs: Quando ocorrer 'alta médica definitiva', existe a necessidade de comprovação documental
+> nos autos para a realização de NOVA PERÍCIA MÉDICA JUDICIAL."
+
+**Duas variantes, decididas pelo exame:**
+
+- **C1, com redução subsistindo** (caso Ana Sueli, memória conclusao-auxilio-acidente-sem-consolidacao):
+  há limitação ao exame, mas o quadro segue em tratamento. Descrever a limitação atual e fechar
+  com o texto padrão. Não enquadrar no Anexo III nem no art. 86: ambos pressupõem consolidação.
+- **C2, sem redução alguma e doença ativa** (caso Jefferson Rudolf, 31.07.2026): exame inteiramente
+  normal, doença em atividade, possível cirurgia. Não é Modelo 3 (que pressupõe tratamento
+  concluído sem sequela) nem Modelo 5 (que é consolidado). Estrutura validada: P1 diagnóstico; P2
+  segmentos sem doença (variação anatômica etc.); P3 etiologia e nexo; P4 exame atual sem
+  limitação; P5 boilerplate; P6 não consolidação; P7 o art. 86 exige consolidação COM sequela
+  redutora, ausentes ambas, sem Anexo III, e recomendação de reavaliação após a consolidação.
+
+**Dados de interesse pericial:** 1. DID; 2. "sem incapacidade nem afastamento" (C2) ou o período
+documentado (C1); 3. Consolidação: conceito da ABMLPM e a afirmação de que o quadro NÃO está
+consolidado.
+
+**Quesitos:** grau, valoração, DIIP e consolidação ficam prejudicados, com a frase que explica:
+"consolidadas?" = "Não. O quadro não se encontra consolidado."; consolidação x DCB = "Prejudicado.
+O quadro não se encontra consolidado."; valoração = "Prejudicado. A lesão não está consolidada,
+não sendo possível quantificar a sequela." Nunca "Prejudicado." solto. IMC e revisor como sempre.
+
+---
+
+## MODELO D — Há dano, mas NÃO há nexo acidentário (causa pré-existente ou patológica)
+
+Usar quando existe sequela ao exame, mas a hipótese mais provável é que ela decorra de condição
+pré-existente e constitucional (tumor ósseo, doença metabólica, degeneração documentada) ou do seu
+tratamento cirúrgico, e não do acidente, que serviu apenas de fator desencadeante. Caso que
+originou o modelo: Daniela Klabunde, 21.08.2026 (fratura patológica da falange proximal do 5º dedo
+sobre encondroma registrado desde 2004, ressecado com curetagem e enxerto de ilíaco).
+
+**Estrutura:** reconhecer a sequela ao exame (com goniometria, distância polpa-palma e comparação
+com o contralateral, nunca só "grau leve"); documentar a pré-existência com data e teor do
+documento; explicar o mecanismo (fratura patológica em osso enfraquecido, acidente como mero
+desencadeante); afastar o nexo com a sequela. NÃO usar o boilerplate do Decreto 3048/99 nem o
+quadro 6. Literatura REAL em nota de rodapé (para encondroma, validadas: Zyluk 2021 PMID 34734563;
+Ramos-Pascua 2018 PMID 29551341; Zheng 2014 PMID 25106766; Çapkin 2020 PMID 32373401; Hung 2015
+PMID 25810024; Ipponi 2024 PMID 39781633). Quando houver dois ou mais acidentes e só a CAT de um
+constar, sinalizar a lacuna documental.
+
+**Blindagem obrigatória, escrita na própria conclusão** (os três ataques são previsíveis, ver o
+Advogado do Diabo do caso Klabunde):
+
+1. Distinguir por escrito o nexo do AFASTAMENTO temporário (que existiu: auxílio-doença
+   acidentário, espécie 91) do nexo da SEQUELA definitiva, único objeto do art. 86, que se afasta.
+2. Enfrentar a concausa: o trauma foi concausa apenas do evento agudo já resolvido; a causa
+   determinante da limitação residual está na doença de base e no ato cirúrgico. Não chamar o
+   acidente de "fator desencadeante" sem essa explicação, porque a expressão é definição de
+   concausa e atrai o art. 86.
+3. Resolver a aparente contradição entre admitir sequela permanente com repercussão no trabalho e
+   negar o benefício: o benefício exige nexo da sequela com o acidente, não só a existência dela.
+
+A atribuição de causa é probabilística: assumir a incerteza e blindá-la com literatura pertinente é
+mais defensável do que afirmá-la como certeza. Se o Dr. optar por CONCAUSA em vez de ausência de
+nexo, é decisão dele: apontar as duas saídas e entregar a que ele indicar.
+
+---
+
 ## Identificação do tipo pelo laudo
 
 | Indicador no laudo | Tipo |
@@ -390,6 +596,9 @@ incapacidade quando da DCB em [data da última DCB documentada]."
 | Sequela consolidada / sem perspectiva de melhora | Modelo A |
 | DII mencionada junto com DID | Modelo B |
 | Consolidação mencionada | Modelo A |
+
+| Tratamento em curso, cirurgia indicada, sem alta (auxílio-acidente) | Modelo C (não consolidada) |
+| Sequela presente, mas causa pré-existente ou patológica documentada | Modelo D (dano sem nexo) |
 
 Se o tipo não estiver explícito, analisar o exame físico e o pedido da petição:
 auxílio-acidente → Modelo A; auxílio-doença continuado → Modelo B.
@@ -420,7 +629,7 @@ incluí-los e respondê-los também.
 
 **Estilo das respostas — baseado no laudo validado Yeissica/junho-2026:**
 - Respostas curtas e diretas; máximo 1 a 2 frases
-- "Mais detalhes, vide item Discussão e Conclusão desse laudo." é resposta válida e preferível
+- "Mais detalhes, vide item Discussão e Conclusão deste laudo." é resposta válida e preferível
   quando o quesito pede o que já está na conclusão
 - "Vide item 3 do laudo." para questões de profissiografia
 - "Prejudicado." para quesitos sobre incapacidade total permanente (que não existe)
@@ -429,7 +638,7 @@ incluí-los e respondê-los também.
 - "Gera limitação para atividades pontuais." para quesito sobre trabalho doméstico (Q15)
 - "A limitação de funcionalidade claramente detectada nas manobras propedêuticas do
   exame pericial é que ampara tal divergência. Mais detalhes, vide item Discussão e
-  Conclusão desse laudo." para quesito de divergência com laudo administrativo (Q16)
+  Conclusão deste laudo." para quesito de divergência com laudo administrativo (Q16)
 
 **Quesitos específicos com resposta padrão validada:**
 
@@ -437,27 +646,38 @@ incluí-los e respondê-los também.
 |---|---|
 | Q1 autora (ciência art. 473 CPC) | "Sim. Este perito tem ciência de tal disposição e todas as respostas estão fundamentadas nos achados periciais." |
 | Q5 autora (concordar com legislação) | "Não é objetivo deste laudo concordar ou discordar da legislação." |
+| Q juízo nexo (h) — "decorrente de doença profissional/do trabalho? nexo com a última atividade?" | Em caso de ACIDENTE (auxílio-acidente): "Há nexo causal das lesões citadas no item 3 do laudo com o acidente de trabalho ocorrido. Mais detalhes, vide item Discussão e Conclusão deste laudo." Enquadrar o nexo como LESÕES (item 3) ↔ ACIDENTE, não patologia ↔ atividade. NÃO nomear a atividade nem citar CAT/benefícios na resposta (a fundamentação vai na Discussão). Ver [[feedback-quesito-nexo-lesoes-acidente]] |
 | Q réu 1 (diagnóstico/CID) | Repetir P1 + P2 da conclusão na íntegra |
-| Q réu 2 (causa) | Marcar 2.7 com (X); justificativa: mais detalhes, vide item Discussão e Conclusão desse laudo |
-| Q réu 6 (data início redução) | "Na consolidação em [data], pelo critério da compatibilidade anátomo clínica." |
-| Q réu 8/8.1/8.2 (reabilitação) | "Não é caso para reabilitar, pode fazer a mesma atividade que desenvolvia na época do acidente, porém com maior dificuldade para algumas operações." |
+| Q réu 2 (causa) | Marcar 2.7 com (X); justificativa: mais detalhes, vide item Discussão e Conclusão deste laudo |
+| Q réu 5 (a redução/incapacidade é temporária ou permanente?) | Se HÁ redução permanente (auxílio-acidente com sequela): marcar "Permanente". Se RESTITUIÇÃO INTEGRAL / capacidade plena (4.1 marcada, sem sequela): NÃO marcar nenhuma caixa e responder "Prejudicado. A [autora/o autor] não apresentou ao atual exame pericial, incapacidade laborativa ou redução de sua capacidade para o trabalho que tinha na época do acidente." NÃO marcar "Temporária" só porque houve incapacidade temporária no passado (já cessada): o quesito pergunta pela natureza de uma redução ATUAL, que na restituição integral não existe. Regra do Dr. 06.08.2026 (laudo Josiane). Ver [[feedback-reu-q5-temporaria-permanente-prejudicado]] |
+| Q réu 6 (data início redução) | "Na consolidação em [data], pelo critério da compatibilidade anatomoclínica." |
+| Q réu 8/8.1/8.2 (reabilitação) | COM sequela: "Não é caso para reabilitar, pode fazer a mesma atividade que desenvolvia na época do acidente, porém com maior dificuldade para algumas operações." Restituição integral / sem incapacidade: "Prejudicado." (o quesito 8 principal é um "gateway" que às vezes NÃO traz linha "Resposta:" própria no template, só as caixas: nesse caso o quesito sai SEM resposta se não for inserida uma; conferir e responder mesmo assim). |
 | Q réu 9/10/11 (incap. total permanente) | "Prejudicado." |
 | Q réu 15 (trabalho doméstico) | "Gera limitação para atividades pontuais." |
 
 **Por tipo de quesito geral:**
 | Tipo | Como responder |
 |------|---------------|
-| Quesito pede o que já está na conclusão | "Mais detalhes, vide item Discussão e Conclusão desse laudo." |
+| Quesito pede o que já está na conclusão | "Mais detalhes, vide item Discussão e Conclusão deste laudo." |
 | Quesito sobre profissiografia | "Sim, vide item 3 do laudo." |
-| Incapacidade para a profissão | Tipo (parcial/total) + "Mais detalhes, vide item Discussão e Conclusão desse laudo." |
+| Incapacidade para a profissão (é incapacitante? total/parcial?) | Auxílio-acidente é incapacidade PARCIAL e permanente. Responder SEMPRE: "Há redução parcial e permanente da capacidade para o trabalho habitual, que não impede o seu exercício, ainda que com maior dificuldade." Ir direto, sem "não incapacita"; referência é o TRABALHO HABITUAL, não a profissão atual. Ver [[feedback-incapacidade-parcial-permanente-resposta]] |
 | Permanente ou temporária | "Permanente (X)." |
 | Incapacita para toda atividade | "Prejudicado." |
 | Necessita assistência permanente | "Prejudicado." |
 | Quesito sobre reabilitação profissional | "Não é caso para reabilitar..." |
 | **Concordar/discordar de legislação** | "Não é objetivo deste laudo concordar ou discordar da legislação." |
+| **Abonar/desabonar documento, laudo ou atestado de terceiro** (ex.: "este Perito DESABONA o laudo?", "é possível acolher o diagnóstico apontado por seu colega?") | Não cabe ao perito abonar/desabonar peças das partes. Responder: "Prejudicado, não é objetivo desta perícia abonar ou desabonar documentos que as partes trazem aos autos, mas avaliar pericialmente o autor com a devida anamnese e exame físico pericial presencial, além de avaliar os documentos trazidos aos autos e emitir uma conclusão pericial de forma autônoma e imparcial para ajudar ao magistrado." Se o quesito invocar Parecer/Resolução do CFM sobre o Médico do Trabalho poder discordar de atestado, apontar que o dispositivo se refere ao **Médico do Trabalho e não ao Médico Perito Judicial**, de modo que o enfoque do quesito está errado. Regra do Dr. 24.08.2026 (laudo Rogerio Laguna). |
 | **Esforço físico excessivo** | "Ninguém está apto para atividades com esforços físicos excessivos e constantes, para balizar tais situações existe a NR 17 que versa sobre ergonomia e suas implicações no trabalho." |
 | **Igualdade no mercado de trabalho** | "Prejudicado, não é objetivo desta perícia tal avaliação." |
 | **Adaptação ergonômica** | "Prejudicado, não é objetivo desta perícia tal avaliação." |
+| **Performance esportiva (atleta profissional)** | "A performance esportiva não é objeto desta perícia." |
+| **Paridade competitiva no meio esportivo** | "Prejudicado, não é objetivo desta perícia tal avaliação." |
+
+**Quesitos de ATLETA PROFISSIONAL (validado no laudo Johann Buetes Arndt, 29/07/2026):** quando a profissão habitual é atividade física de alto rendimento, separar o que é medicina-pericial (limitação funcional objetiva ao exame) do que é desempenho ou competitividade esportiva (fora do escopo). Perguntas sobre performance, paridade com atleta sem histórico de lesão e capacidade competitiva respondem-se como "não é objeto/objetivo desta perícia"; as exigências físicas específicas (arrancadas, giros, saltos, desaceleração, contato) respondem-se pela presença ou ausência de limitação funcional ao exame. IMPORTANTE: para o atleta profissional, a partida ou o treino É a atividade laboral, então o acidente esportivo ocorrido nesse contexto é acidente no exercício do trabalho e marca-se a caixa 2.7 do réu (acidente de trabalho).
+
+**Datas dentro das respostas (regra única):** escrever SEMPRE "no dia DD.MM.AAAA", "emitido no dia DD.MM.AAAA" ou "datado do dia DD.MM.AAAA". O `gerar_conclusao_odt.py` insere "dia" antes de datas dd.mm.aaaa nas respostas; desde 27.08.2026 ele respeita as preposições que já regem a data ("de", "em", "desde", "até", "entre ... e", "na data de"), mas a forma segura continua sendo escrever o "dia" por extenso, porque cada exceção nova só entra na lista depois de estragar um laudo (foram três: "em dia", "de dia" e "data de dia"). Datas de exame, de acidente, de DCB e de documento: todas.
+
+**Subtipo: comarca SISPERJUD com quesitação do juízo NÃO transcrita e INSS citado só se o laudo for favorável** (Guabiruba, Ivanor Seidler, 21.08.2026). O ODT do pré-laudo traz os quesitos do juízo com a nota "obter no sistema" e a seção 8.3 do réu como "Não localizados nos autos". Nesse caso: manter no ODT a resposta ao quesito do juízo apontando para a quesitação do sistema, deixar a seção do réu como está e NÃO passar `marcar_caixas_reu` (as caixas não existem no template; o script só reporta "não localizadas"). A Discussão e os Dados de interesse pericial vão normalmente; a quesitação numerada é respondida na transcrição pela skill /sisperjud.
 
 Salvar respostas em `quesitos-respostas.json`:
 ```json
@@ -484,11 +704,21 @@ Salvar respostas em `quesitos-respostas.json`:
    {
      "quesitos_juizo": [],
      "quesitos_autor": [{"numero": "1", "resposta": "..."}],
-     "quesitos_reu":   [{"numero": "1", "resposta": "..."}]
+     "quesitos_reu":   [{"numero": "1", "resposta": "..."}],
+     "marcar_caixas_reu": ["2.7", "4.2", "Permanente"]
    }
    ```
    Quesito sem resposta possível: deixar `"resposta": ""` (fica em branco) ou
    `"resposta": "Prejudicado."`. NUNCA "Não se aplica".
+
+   **Campo `marcar_caixas_reu`** (opcional): lista dos rótulos das caixas do réu a
+   marcar com `( X )`. O script `gerar_conclusao_odt.py` (função `marcar_caixas_reu`)
+   localiza o PARÁGRAFO pelo texto (tolera `<text:soft-page-break/>` e spans), marca a
+   PRIMEIRA caixa VAZIA daquele parágrafo (robusto a `( )`, `()` e `( <text:s/>)`, sem
+   confundir com parênteses de texto) e padroniza as demais vazias como `(   )`.
+   Auxílio-acidente COM redução: `["2.7","4.2","Permanente"]`. Capacidade plena
+   (Modelo 3): `["2.7","4.1"]`. Templates sem caixas (quesitos abertos): omitir o campo.
+   Ainda assim, conferir as caixas marcadas no revisor antes de entregar.
 
 3. Rodar o gerador ODT (trabalha sobre uma cópia, não altera o original):
    ```bash
@@ -500,6 +730,8 @@ Salvar respostas em `quesitos-respostas.json`:
      --autos  "NUMERO-DOS-AUTOS"
    ```
 
+**Caminho canônico: SEMPRE `~/.claude/scripts/gerar_conclusao_odt.py`.** A cópia que vive dentro do plugin (`~/.claude/plugins/cache/jarbas-lino/jarbas/1.0.0/scripts/`) NÃO é autossuficiente: importa `lino_redacao.py` e `fix_header_logo.py`, que só existem em `~/.claude/scripts/`, e quebra com ModuleNotFoundError (caso Dubiela, 04.08.2026). O `propagar_jarbas.sh` copia os módulos irmãos junto, mas o comando documentado é o de `~/.claude/scripts`.
+
 O script `gerar_conclusao_odt.py`:
 - Insere os blocos da conclusão entre "Discussão / Conclusão:" e "Quesitos:",
   com 1 linha em branco entre blocos e 2 antes de "Dados de interesse pericial:".
@@ -507,10 +739,24 @@ O script `gerar_conclusao_odt.py`:
 - Em texto NOVO: remove travessões, troca "Não se aplica" por "Prejudicado",
   põe "dia"/"Dia" antes de datas dd.mm.aaaa.
 - Corrige a data da página 1 para hoje (se diferente).
+- Remove sozinho a seção "OBSERVAÇÕES PARA O PERITO" ANTES de contar as folhas (automático desde
+  05.09.2026, depois de duas reincidências da remoção manual esquecida; ver a Regra 22).
+- Converte para texto as células de data TIPADAS das tabelas (`office:value-type="date"`), que o
+  editor cria quando o Dr. digita uma data numa célula: sem isso o LibreOffice reconstrói "13/03/25"
+  a partir do `office:date-value` mesmo com o texto trocado (caso Viviane, 24.08.2026).
 - Substitui "xxx (xxx)" das Considerações finais pela contagem real de folhas
   (converte o ODT para PDF via LibreOffice e conta as páginas; não usa poppler).
 - Re-zipa o ODT cru (mimetype primeiro) preservando o cabeçalho/logo e todo o
   resto. NUNCA reconverte o ODT pelo LibreOffice (isso quebraria o cabeçalho).
+- Ao final, DEPOIS de restaurar o logo, roda a HIGIENIZAÇÃO automática (a skill
+  `/limpar-laudo`, via `limpar_laudo.limpar_arquivo`): remove caracteres
+  invisíveis (zero-width, joiners, marcas de direção, caracteres de "tag") e os
+  metadados de origem do ODT (gerador, autor do template, data de criação antiga,
+  tempo e ciclos de edição), e limpa os metadados das imagens sem recomprimir
+  (logo preservado). NÃO altera o texto (respeita "nunca inventar") e é defensiva:
+  se falhar, não quebra a geração (o log traz "limpeza: ..."). Por isso o laudo já
+  sai higienizado; não é preciso rodar `/limpar-laudo` à mão sobre o que passou
+  pelo gerador. Confirmado pelo Dr. em 22.08.2026.
 
 As quebras de página antes de Considerações finais, Bibliografia e Responsável já
 vêm do template do JARBAS e são preservadas.
@@ -521,6 +767,11 @@ vêm do template do JARBAS e são preservadas.
 da altura do exame, calcule o IMC (peso dividido pela altura ao quadrado), preencha o
 campo "IMC:" com o valor e, na lista de classificação, mantenha SOMENTE a faixa em que
 o periciado se enquadra, apagando as demais. Nunca pode sobrar mais de uma faixa.
+A faixa que fica (abaixo da tabela) deve estar em **Arial 10, preta, e COLADA à tabela**
+de peso/altura/IMC (sem o parágrafo vazio entre a tabela e a faixa). Confirmado pelo Dr.
+em 02/07/2026. O script `gerar_conclusao_odt.py` já faz isso na função `colar_faixa_imc`
+(cria o estilo IMCFX e remove o vazio); em edição manual do XML, remover o `<text:p .../>`
+vazio entre `</table:table>` e a faixa e reestilizar a faixa para Arial 10pt.
 
 **Revisão final:** antes de entregar, rode SEMPRE o subagente `revisor-laudo` (ferramenta
 Task/Agent) sobre o ODT gerado. Ele renderiza o PDF, percorre todas as páginas e confere
@@ -529,6 +780,18 @@ cortada, datas, IMC, formatação da conclusão e dos quesitos). Se o veredito f
 aplique as correções apontadas e rode o revisor de novo, até o veredito PRONTO (no máximo
 3 rodadas). Só então avise o Dr. que o laudo está pronto. Esta etapa é obrigatória e nunca
 deve ser pulada.
+
+### Passo 8.5 — Blindagem automática (Advogado do Diabo + Defensor do Laudo), quando o desfecho for negativo ou controverso
+
+Se o desfecho da conclusão NEGAR o benefício (Modelos 3, 4 ou 5: sem sequela, sem redução da capacidade, ou restituição integral) OU for CONTROVERSO (Art. 86 grau leve sem enquadramento no Anexo III, concausa, ou enquadramento discutível no quadro 6), rode a blindagem ANTES de entregar. O Modelo já foi decidido no Passo 5, então a condição é direta. Nos laudos favoráveis ao autor (com incapacidade ou redução reconhecidas), NÃO rodar esta etapa.
+
+1. **Advogado do Diabo:** rode o subagente `advogado-do-diabo` (ferramenta Task/Agent) sobre o ODT gerado e a pasta dos autos. Ele assume o papel do advogado do autor, ataca o laudo por todos os ângulos (método e exame, autos, literatura contrária real, jurídico-formal, coerência interna) e gera um dossiê de vulnerabilidades em ODT (uso interno, em /tmp). SÓ ataca e relata; não edita o laudo.
+
+2. **Defensor do Laudo:** em seguida, rode o subagente `defensor-do-laudo` passando o dossiê, o laudo ODT e a pasta dos autos, com o caminho de SAÍDA igual ao do laudo final (o script `reforcar_laudo_odt.py` preserva a versão pré-blindagem em `.bak`). Ele blinda o laudo ponto a ponto SEM inventar e SEM inverter o desfecho: reforça o achado objetivo com o que já existe nos autos, acrescenta literatura real favorável em nota de rodapé, fecha a linguagem vaga, torna as respostas autossuficientes e diminui o peso de documento da parte por telemedicina. O laudo blindado passa a ser o laudo final; a versão anterior fica no `.bak`.
+
+3. **Revisão final do blindado:** rode de novo o subagente `revisor-laudo` sobre o laudo já blindado (as notas de rodapé podem acrescentar página; o script recalcula as folhas). Corrija até o veredito PRONTO. Esta é a revisão que vale para a entrega, e substitui a do Passo 8.
+
+No resumo ao Dr. (Passo 9), informe: o caminho do dossiê em /tmp, os pontos mais perigosos, o que o Defensor reforçou (com as referências reais usadas, com PMID), os ataques que ficaram SEM defesa (fraqueza real, não inventar) e as pendências que dependem do Dr. (medidas a refazer, fotos ou documentos a anexar). Se algum ponto for decisão redacional do Dr. (por exemplo, acrescentar a nota de equiparação a acidente de trabalho versus manter "acidente de trajeto"), aponte a decisão em vez de impô-la.
 
 ### Passo 9 — Entregar ao usuário
 
@@ -589,15 +852,22 @@ Esses elementos são herdados do estilo Heading e devem ser removidos em todo la
 ### Regra 12 — Respostas aos quesitos: objetivas, concisas e em itálico
 
 Responder **somente o que foi perguntado**. Máximo de 1 a 2 frases por resposta.
-O texto das respostas deve ser inserido **sempre em itálico** (o rótulo "Resposta:"
-permanece no estilo normal). O script `gerar_conclusao_odt.py` aplica o itálico
-automaticamente via `run_novo.font.italic = True`.
+O rótulo "Resposta:" E o texto da resposta ficam **AMBOS em itálico** (tudo dentro
+do span CONC_IT). Regra do Dr. de 08/07/2026: o rótulo "Resposta:" NÃO fica reto, fica
+em itálico junto com a resposta. O script `gerar_conclusao_odt.py` já recompõe cada
+parágrafo com "Resposta: " + resposta dentro do span CONC_IT. Em edição manual do XML,
+mover "Resposta: " para DENTRO do span CONC_IT (nunca deixar o rótulo fora do span).
+NÃO tratar rótulo "Resposta:" em itálico como erro na revisão (é o correto agora).
 
 ### Regra 13 — Data da página 1: verificar SEMPRE
 
 A data da página 1 deve ser conferida e corrigida para a data atual em todo laudo
-processado. O formato correto é: "Cidade, DD de mês de AAAA" (mês em minúsculas).
-O script corrige automaticamente — se a data não for encontrada, alertar o Dr. Lino.
+processado. O formato correto é: "Cidade, DD de Mês de AAAA", SEMPRE por extenso e com o MÊS EM
+MAIÚSCULA (primeira letra), e NUNCA numérica (nem "06/08/2026" nem "06.08.2026").
+O DIA vai SEMPRE com dois dígitos (zero à esquerda): "06" e não "6", ex.:
+"Blumenau, 06 de Agosto de 2026". Regra do Dr. de 06.08.2026 (reverte a de 02/07/2026, que pedia minúscula).
+O script corrige automaticamente (data_hoje_extenso já zero-preenche o dia) — se a data
+não for encontrada, alertar o Dr. Lino.
 
 ### Regra 14 — Espaçamento dos quesitos (formato obrigatório)
 
@@ -663,7 +933,7 @@ P5: enquadramento no Quadro 6 / Decreto 3048/99
 "Dados de interesse pericial:"
 1. DID
 2. Períodos de incapacidade (total/temporária → parcial/permanente)
-3.Quanto a Consolidação (ABMLPM + "No caso em tela...")
+3. Quanto à Consolidação (ABMLPM + "No caso em tela...")
 
 Ordem completa dos 12 blocos do texto:
 1. P1 (fato gerador)
@@ -674,7 +944,7 @@ Ordem completa dos 12 blocos do texto:
 6. "Dados de interesse pericial:"  ← 2 blanks antes deste
 7. Item 1 (DID)
 8. Item 2 (incapacidade)
-9. "3.Quanto a Consolidação:"
+9. "3. Quanto à Consolidação:"
 10. "- Segundo a ABMLPM..."
 11. "Consolidação médico-legal da lesão..."  ← SEM hífen
 12. "No caso em tela..."
@@ -696,6 +966,25 @@ até "Considerações finais") e trocar `(X)` por `( X )` e cada `( )` por
 `( <text:s text:c="2"/>)`. Aplicar SOMENTE nos quesitos do INSS.
 Confirmado pelo Dr. em 30/06/2026 (laudo Janice Maria Sausen).
 
+REFORÇO (Dr., 16/07/2026, laudo George): a padronização vale para TODA caixa de
+marcação de resposta, não só as óbvias. O padrão único é: vazia = 3 espaços
+`( <text:s text:c="2"/>)` (mesma largura do `( X )`); marcada = `( X )`. Varrer o
+documento e uniformizar TODAS as vazias (aparecem com 1, 2, 3 ou 4 espaços,
+principalmente em laudos vindos de conversão .doc→ODT, onde `marcar_caixas_reu`
+não localiza a seção e não roda): normalizar `( <text:s/>)` e
+`( <text:s text:c="3"/>)` para `( <text:s text:c="2"/>)`, sem tocar nas `( X )`.
+
+### Regra 21b — Espaçamento vertical dos quesitos do réu com caixas (8, 10, 11)
+
+Nos quesitos do réu com caixas de marcação (tipicamente 8, 10 e 11 do INSS):
+- A pergunta fica COLADA às caixas, SEM parágrafo vazio entre a pergunta e os parênteses.
+- UMA linha em branco separa as caixas (ou a linha "Justifique...", no 11) da "Resposta:".
+- Espaço após a caixa antes do texto: "(   ) Sim. Indique...", nunca ")Sim".
+O `gerar_conclusao_odt.py` faz isso automaticamente na função `normalizar_espacamento_caixas_reu`
+(chamada após `marcar_caixas_reu`): remove o vazio entre pergunta e caixas, garante o vazio antes
+da "Resposta:" e corrige ")Sim"/")Não". Confirmado pelo Dr. em 04.08.2026 (laudo Jean Carlo
+Pessatti). Ver [[feedback-espacamento-caixas-reu]].
+
 ### Regra 22 — Remover OBSERVAÇÕES PARA O PERITO antes de contar as folhas
 
 A seção final "OBSERVAÇÕES PARA O PERITO" (notas internas do pré-laudo: pendências,
@@ -704,6 +993,10 @@ autos. SEMPRE removê-la ao finalizar. A ORDEM importa: PRIMEIRO cortar do pará
 título `OBSERVAÇÕES PARA O PERITO:` até `</office:text>` e re-zipar cru; SÓ ENTÃO
 recontar as páginas e atualizar o número em "Considerações finais" (a remoção costuma
 reduzir uma folha). Confirmado pelo Dr. em 29/06 e reforçado em 30/06/2026.
+
+Desde 05.09.2026 o `gerar_conclusao_odt.py` faz a remoção sozinho no início de `gerar()`, antes de
+contar as folhas (a linha "observações: seção removida" aparece no log). O passo manual acima
+continua valendo para laudo editado FORA do gerador (ex.: remoção de seção pelo entregar-laudo-eproc).
 
 ### Regra 23 — Quesitos do réu (INSS) quando NÃO há incapacidade nem redução de capacidade
 
@@ -718,8 +1011,8 @@ laborativa, com 4.1 marcado), formatar os quesitos do réu assim. Confirmado pel
 - **Q8** (potencial de reabilitação, com 2 caixas): puxar as duas opções para cima,
   COLADAS à pergunta (remover o parágrafo vazio entre a pergunta e as opções) e inserir
   embaixo "Resposta: Prejudicado." O template não tem campo "Resposta:" próprio no Q8;
-  inserir manualmente no content.xml um parágrafo do rótulo "Resposta:" com o texto
-  "Prejudicado." em itálico (span CONC_IT), após a 2ª opção e antes do 8.1.
+  inserir manualmente no content.xml um parágrafo com "Resposta: Prejudicado." INTEIRO
+  dentro do span CONC_IT (rótulo e texto ambos em itálico), após a 2ª opção e antes do 8.1.
 - **Q8.1** (Sim/Não): NÃO marcar o "Sim". Deixar somente a resposta (ex.: "Não é caso
   para reabilitar; o autor mantém capacidade para a mesma atividade...").
 - **Q10 e Q11** (cada um com caixas Não/Sim): puxar os parênteses das caixas para cima,
@@ -728,6 +1021,198 @@ laborativa, com 4.1 marcado), formatar os quesitos do réu assim. Confirmado pel
 Nesses casos, as ÚNICAS caixas marcadas do réu ficam **2.7** (acidente de trabalho) e
 **4.1** (capacidade plena). Para "colar" as caixas à pergunta, remover no content.xml o
 `<text:p .../>` vazio entre o parágrafo da pergunta e o parágrafo da primeira caixa.
+
+### Regra 24 — Quesito 8 do réu (casos COM redução/auxílio-acidente): inserir Resposta padrão
+
+Confirmado pelo Dr. em 02/07/2026 (laudo Gisele Farias e demais da pauta Brusque 01.07).
+Nos laudos de auxílio-acidente COM redução da capacidade (art. 86 ou Anexo III), o quesito
+8 do réu ("Caso exista incapacidade permanente para a atividade habitual...", com as duas
+caixas "Não há potencial" / "Existe potencial") NÃO tem campo "Resposta:" próprio no
+template. Inserir, logo após as duas caixas e antes do 8.1, um parágrafo de resposta
+(rótulo "Resposta:" E texto ambos em itálico, tudo dentro do span CONC_IT) com o texto EXATO:
+
+> "Não é caso para reabilitar, pode fazer a mesma atividade que desenvolvia na época do
+> acidente, porém com maior dificuldade para algumas operações."
+
+As duas caixas do Q8 ficam VAZIAS (não marcar). Esse texto é neutro de gênero (serve para
+autor e autora).
+
+**Q11 do réu** (necessidade de acompanhamento permanente de terceiros): a resposta é apenas
+**"Prejudicado."** (curta, sem acrescentar "o autor/a autora é independente..."). O Q10
+segue "Prejudicado. Não há incapacidade permanente para toda e qualquer atividade."
+
+**ATUALIZAÇÃO 27.08.2026:** o `gerar_prelaudo.py` passou a separar os sub-quesitos 8.1 e
+8.2 em quesitos próprios, cada um com o seu campo "Resposta:" (função
+`dividir_subquesitos`). Nos pré-laudos gerados a partir dessa data o Q8 já nasce com os
+três campos. Em laudo ANTIGO, o 8 continua carregando 8.1 e 8.2 no mesmo parágrafo — ver
+a Regra 26.
+
+### Regra 25 — Nexo com lesão ou doença PRÉ-EXISTENTE: exigir o documento do estado anterior
+
+Sempre que o dano discutido incidir sobre órgão, segmento ou função que JÁ estava doente
+ou lesado antes do fato (olho operado, joelho já meniscectomizado, coluna já degenerada,
+ombro já tendinopático), a pergunta pericial não é "o trauma pode ter piorado?", e sim
+"existe documento que demonstre a piora?".
+
+**Método obrigatório, nesta ordem:**
+
+1. Levantar nos autos TODO documento anterior ao fato que descreva a função do órgão
+   (acuidade visual, arco de movimento, força, laudo de imagem, perícia administrativa,
+   AIH, pedido de cirurgia). Ver o item 6 do Passo 3: esses documentos costumam estar
+   nos anexos escaneados.
+2. Levantar os documentos CONTEMPORÂNEOS ao fato (boletim de pronto-socorro, ficha do
+   SAMU, exames de imagem do dia, primeira perícia do INSS depois do acidente).
+   Conferir lateralidade, região atingida e o que o exame do dia registrou sobre o
+   órgão em discussão. Silêncio nesses documentos é achado, e deve ser dito.
+3. Comparar o estado ANTES com o estado DEPOIS. Sem uma medida anterior e outra
+   posterior da mesma função, não há como aferir agravamento.
+
+**Como concluir quando falta a documentação comparativa:** reconhecer a possibilidade
+e negar a certeza, nesta ordem e sem rodeios: (i) a sequela existe e está caracterizada;
+(ii) a doença ou lesão já estava documentada antes do fato, citando data e teor do
+documento; (iii) é possível, em tese, que o trauma tenha agravado o quadro; (iv) não há
+exame anterior comparável ao posterior, faltando documentação que permita afirmar o
+agravamento com a devida certeza; (v) por isso NÃO se estabelece nexo, sequer concausal.
+
+Redação validada (laudo Luiz Eduardo Lopes, 25.08.2026):
+"Eventual agravamento pelo trauma de <data> é possível, porém não demonstrado, faltando
+documentação que permita afirmá-lo com a devida certeza. Não se estabelece, por isso,
+nexo, sequer concausal, entre o acidente e <o dano>."
+
+**Cuidados que valem sempre:**
+- Relatório da parte que atribui o dano ao acidente APOIADO NA NARRATIVA DO PERICIANDO
+  não prova nexo. Quando o próprio documento disser "o paciente relata", citar essa
+  expressão: ela mostra a origem da informação.
+- Conferir a LATERALIDADE nos documentos do dia do fato. Trauma do lado oposto ao órgão
+  doente derruba a tese de agravamento.
+- Concausa (art. 21, I, da Lei 8.213/91) exige contribuição DEMONSTRADA, não meramente
+  possível. Possibilidade teórica não é concausa.
+
+---
+
+### Regra 26 — Respostas do réu: conferir SEMPRE o alinhamento quesito x resposta
+
+O `gerar_conclusao_odt.py` casa cada resposta ao NÚMERO do quesito (âncora). Até 27.08.2026
+ele casava por POSIÇÃO, e bastava o documento ter um campo "Resposta:" a menos que o JSON
+para todas as respostas seguintes escorregarem de quesito. Foi o que aconteceu no laudo do
+Nilson de Souza (pauta Indaial 26.08): o Q8 trazia 8.1 e 8.2 embutidos no mesmo parágrafo,
+com um único "Resposta:", e as respostas do 9 ao 19 do réu saíram deslocadas em duas casas.
+
+O que fazer agora:
+
+- **Ler o log do gerador.** Quando um quesito com resposta não encontra campo no documento,
+  sai a linha `ATENÇÃO -> reu: sem campo 'Resposta:' no documento para o(s) quesito(s) ...`.
+  Nunca ignorar: significa que aquelas respostas ficaram DE FORA e as demais podem ter
+  escorregado. A linha `rótulos não casaram (N campos x M respostas) — preenchido por ORDEM,
+  CONFERIR` é o mesmo alerta em grau máximo.
+- **Conferir na revisão final** o Q8/8.1/8.2 e a sequência do 9 ao 19: cada resposta tem de
+  responder à sua própria pergunta. Erro típico do deslocamento: uma pergunta de DATA
+  respondida com texto de limitação funcional, ou um "Prejudicado." num quesito que pede
+  descrição.
+- **Quesito que se responde só pela caixa marcada** (4 e 5 do réu): escrever `"resposta": "-"`
+  no JSON. O gerador REMOVE o campo "Resposta:" em vez de deixá-lo vazio. Regra do Dr. de
+  27.08.2026 — ele apagava esses campos à mão.
+- **Q2 do réu:** a resposta NÃO começa com "Marcada a alternativa 2.7."; vai direto ao
+  conteúdo da justificativa (a caixa marcada já diz a alternativa). Idem no Q4, que sequer
+  leva resposta.
+- **Quesito que já veio RESPONDIDO no pré-laudo** (ex.: Q1 do autor com "Resposta: Sim."): o
+  gerador só preenche campos vazios. Casando por número isso não desloca mais as demais, mas o
+  log vai acusar "sem campo" para aquele número: conferir se a resposta pré-existente é a
+  desejada e, se quiser trocá-la, editar o content.xml, não o JSON. (Caso Yris Olivo, 07.08.2026.)
+
+### Regra 27 — Literatura em nota de rodapé: conferir na FONTE o segmento, a autoria e os achados contrários
+
+Antes de gravar qualquer referência (Modelo 5, Modelo D, blindagem do defensor-do-laudo), três
+checagens obrigatórias, feitas no registro do artigo e não de memória:
+
+1. O estudo cobre o SEGMENTO ANATÔMICO e o tipo de lesão do caso? Conferir o CID ou a região que o
+   estudo usou para selecionar a casuística, não só o título. No caso Jean Brauvers (27.08.2026) o
+   registro sueco citado (Alfort 2023) levantou fraturas dos dedos 2 a 5 (S62.6) e o laudo tratava
+   de polegar (S62.5): a referência principal não cobria o caso.
+2. Autoria e ano batem com a fonte? Duas das três referências daquele laudo estavam com autores
+   trocados.
+3. O mesmo resumo traz achados DESFAVORÁVEIS? Se traz (no Ipsen 1987: intolerância ao frio em 36%,
+   dormência em 36%, dor à palpação em 26%), citá-los e afastá-los pelo exame do caso, em vez de
+   omitir: citação seletiva é mais frágil do que citação completa afastada.
+
+Referência que não cobre o segmento é pior do que nenhuma: transforma um ponto forte do laudo em
+vício de fundamentação e sustenta sozinha um pedido de nova perícia.
+
+### Regra 28 — Toda edição estrutural exige recontar as folhas
+
+Sempre que uma edição mudar o número de páginas (remover a seção de quesitos do réu, acrescentar
+notas de rodapé, responder quesitos supervenientes), recontar o page_count do PDF e atualizar
+"constituído de N (por extenso) folhas" nas Considerações finais. O texto costuma estar
+fragmentado num `<text:span>`; substituir com o span. O revisor-laudo cruza o número declarado com
+o real. Caso Manoel, Pomerode, 10.08.2026 (18 para 14 folhas).
+
+### Regra 29 — Localizar o laudo a editar por chave ÚNICA, nunca pelo primeiro nome
+
+Os arquivos se chamam "LAUDO MÉDICO <primeiro nome>.odt" em todas as pautas, e a pasta da pauta é
+renomeada depois da perícia (cai o horário e entra o sufixo " ok"). Buscar por substring do primeiro
+nome pegou o periciando errado em 05.08.2026 (dois "Marcio", Indaial e Rio do Sul; o já entregue
+foi alterado e teve de ser revertido). Regra: casar pelo nome COMPLETO mais a pauta (comarca e
+data); havendo mais de um candidato, listar todos e confirmar antes de escrever; antes de gravar,
+conferir no conteúdo um dado-âncora do caso (nº dos autos); editar sobre cópia em /tmp e só então
+copiar para a pasta. Pautas concluídas saem do LINO (arquivadas): edição retroativa pode não ser
+possível localmente.
+
+### Regra 30 — Cabeçalho: o que sobrevive ao editor do Dr., e o que não sobrevive
+
+Consolidado dos casos Mirela, Juliana, Dilmar, Leonardo e Viviane (31.07 a 24.08.2026):
+
+- SOBREVIVE ao open/save do Apache OpenOffice: frame `as-char` dentro de `text:p` Standard, com
+  `xlink:href` completo, PNG presente no zip e entrada no manifest, e o estilo gráfico do frame
+  definido por inteiro (é o que o gerador escreve e o que `normalizar_peca_lino.py` reconstrói).
+- NÃO sobrevive: frame com href já vazio ou quebrado (o render tolerante do LibreOffice esconde o
+  defeito, mas o save do OpenOffice esvazia o `draw:image` e descarta a pasta Pictures); e a
+  imagem de FUNDO do parágrafo (HdrLogoBg) não renderiza no OpenOffice do Dr.
+- "logo: header sem frame de logo" no log do gerador NÃO é alarme quando o timbre é
+  `<style:background-image>` dentro do estilo de parágrafo do header (templates com MP1 e altura
+  de linha de 2,701 cm, como a pauta Blumenau 18.08): o logo renderiza em todas as páginas. O
+  `restaurar_logo.py` reconhece essa variante desde 05.09.2026.
+- Header TOTALMENTE zerado (`<style:header><text:p/></style:header>`, sem frame e sem PNG): o
+  `restaurar_logo.py` reconstrói o frame canônico do zero (05.09.2026); antes disso a
+  reconstrução era manual (caso Leonardo, 05.08.2026).
+- "Resolvido" só vale no ambiente em que o Dr. edita: validar por round-trip real no OpenOffice
+  dele, não pelo render do LibreOffice. Antes de declarar uma pauta "cabeçalho ok", conferir por
+  arquivo href válido e PNG no pacote.
+
+### Regra 31 — Auxílio-acidente: o retorno ao trabalho habitual NÃO é argumento contra a redução
+
+Correção do Dr. em 17.09.2026, depois de várias respostas a quesitos e manifestações que usavam
+esse argumento.
+
+O auxílio-acidente indeniza justamente quem SEGUE trabalhando, porém com maior dificuldade para o
+trabalho que habitualmente exercia. Voltar ao trabalho habitual, permanecer na mesma função ou no
+mesmo empregador, não ter novo afastamento ou não ter sido readaptado NÃO demonstra que inexiste a
+maior dificuldade. Demonstra apenas que a pessoa segue trabalhando, que é exatamente a situação que
+o benefício pressupõe.
+
+Vale para QUALQUER peça de auxílio-acidente: Discussão/Conclusão, quesitos do Juízo, do autor e do
+réu, quesitos complementares, manifestação à impugnação e blindagem (Advogado do Diabo e Defensor
+do Laudo).
+
+- NUNCA usar o retorno ao trabalho, a permanência na mesma função ou empregador, a ausência de novo
+  afastamento ou de readaptação como fundamento, reforço ou "munição" para negar ou minimizar a
+  redução da capacidade, nem sob o rótulo de "capacidade específica".
+- A ausência de redução (Modelos 3, 4 e 5) se sustenta SÓ no que mede a sequela: exame pericial
+  (goniometria, força, manobras), exames de imagem, documentos médicos contemporâneos e literatura
+  do segmento.
+- O retorno pode constar como FATO (anamnese, histórico ocupacional, tabela 5.1) e na resposta ao
+  quesito que pergunta diretamente se a pessoa voltou a trabalhar ("Sim, retornou à mesma função
+  em DD.MM.AAAA."), sem tirar dele conclusão sobre a capacidade.
+- Quesito que usa o retorno como premissa ("se voltou à mesma função, não há redução?"): responder
+  que o retorno ao trabalho, por si só, não afasta a redução da capacidade, e que a conclusão se
+  funda no exame pericial.
+- Nas conclusões COM redução (Modelos 1 e 2), segue valendo o reverso validado no caso Rosângela
+  Schmitt (09.09.2026): o retorno ao trabalho não afasta a redução; a permanência no emprego prova
+  aptidão global, não integridade do segmento.
+
+**Conferência antes de entregar:** buscar no texto novo "retorn", "voltou", "mesma função",
+"mesma atividade", "mesmo empregador", "novo afastamento", "segue trabalhando", "continua
+trabalhando" e "readapt". Cada ocorrência tem de ser só fato; nenhuma pode sustentar a ausência
+ou a pequena monta da redução.
 
 ### Respostas padrão adicionais confirmadas (laudo Nelson Heinert — junho/2026):
 
@@ -740,7 +1225,7 @@ Nesses casos, as ÚNICAS caixas marcadas do réu ficam **2.7** (acidente de trab
 
 ## AUXÍLIO-ACIDENTE — OS 4 TIPOS OBRIGATÓRIOS DE CONCLUSÃO
 
-Quando o pedido for AUXÍLIO-ACIDENTE, a Discussão/Conclusão deve obrigatoriamente seguir UM destes 4 modelos. A diferença entre os modelos 1 e 2 é exclusivamente o enquadramento ou não no Anexo III do Decreto 3048/99.
+Quando o pedido for AUXÍLIO-ACIDENTE, a Discussão/Conclusão deve obrigatoriamente seguir UM destes 4 modelos. Em todos eles, o retorno ao trabalho habitual NÃO é argumento contra a redução da capacidade (Regra 31). A diferença entre os modelos 1 e 2 é exclusivamente o enquadramento ou não no Anexo III do Decreto 3048/99.
 
 ### MODELO 1 — Redução de capacidade COM enquadramento no Anexo III (exemplo: LAUDO IZAIAS)
 Após a frase de impacto e o parágrafo-ponte ("Com base nas informações obtidas na anamnese durante a expertise médico pericial, tomando-se por base a minudente análise retrospectiva documental e notadamente pelo exame físico geral e segmentar descrito no corpo do laudo técnico, como prerrogativa do Perito deste Juízo, este avaliador técnico de confiança do Magistrado conclui que:"):
@@ -750,15 +1235,31 @@ Após a frase de impacto e o parágrafo-ponte ("Com base nas informações obtid
 OBRIGATÓRIO: citar o número do quadro correto E transcrever a alínea exata logo abaixo. Exemplo (perda do polegar — quadro 5):
 > "b) perda de segmento do primeiro quirodáctilo, desde que atingida a falange proximal; (Redação dada pelo Decreto nº 4.032, de 2001)"
 
-Seguir com "Dados de interesse pericial:" — 1. DID estimada na data do acidente; 2. incapacidade total e temporária do acidente até a DCB; após a DCB, parcial e permanente que não impede o trabalho habitual, porém com maior dificuldade para algumas operações; 3. Consolidação: citar o conceito da ABMLPM ("Consolidação médico-legal da lesão, é quando, finalizados os tratamentos, esgotando-se as medidas terapêuticas atuais e disponíveis, não se vislumbrando evolução para melhora da lesão, configurando-se a sequela, um dano permanente.") e estimar a consolidação na DCB pelo critério da compatibilidade anátomo clínica.
+**Demonstração aritmética do grau (quadro 6, regra de 21.08.2026, laudo Ivanor Seidler):** o enquadramento é uma razão entre arcos medidos, não impressão clínica. Escrever na conclusão o cálculo comparativo lado a lado (arco do lado acidentado x arco do lado íntegro), a perda em percentual e a classificação (mínimo até 1/3; médio acima de 1/3 até 2/3; máximo acima de 2/3), no formato espaçado das regras de redação, com o resultado em negrito. Enquadrar SÓ as articulações cujo grau atinge médio ou máximo e citar as demais como redução que não alcança o corte (no Ivanor: prono-supinação 100 contra 180 graus = perda de 44%, grau médio, enquadra na alínea e; tibiotársica 35 contra 40 graus = 12%, mínimo, não enquadra). A NOTA 2 do quadro 6 (fratura de osso longo consolidada) é fundamento adicional quando a articulação é punho, prono-supinação, cotovelo, joelho ou tibiotársica com fratura próxima.
 
-### MODELO 2 — Redução de capacidade SEM enquadramento no Anexo III (exemplo: LAUDO ADEMAR)
-Vai direto após a frase de impacto (sem o parágrafo-ponte). Texto exato:
+Seguir com "Dados de interesse pericial:" — 1. DID estimada na data do acidente; 2. incapacidade total e temporária do acidente até a DCB; após a DCB, parcial e permanente que não impede o trabalho habitual, porém com maior dificuldade para algumas operações; 3. Consolidação: citar o conceito da ABMLPM ("Consolidação médico-legal da lesão, é quando, finalizados os tratamentos, esgotando-se as medidas terapêuticas atuais e disponíveis, não se vislumbrando evolução para melhora da lesão, configurando-se a sequela, um dano permanente.") e estimar a consolidação na DCB pelo critério da compatibilidade anatomoclínica.
 
-> "Embora a existência de sequela que gera uma mínima redução da capacidade laborativa da parte autora, porém a mesma não possui enquadramento técnico no Anexo III do Decreto 3048/99(Relação de Situações que dão direito ao Auxílio Acidente)."
+### MODELO 2 — Redução de capacidade SEM enquadramento no Anexo III, COM Art. 86 (exemplo VALIDADO: LAUDO CLEITON GRAF, pauta Brusque 01.07.2026)
 
-"Dados de interesse pericial" com consolidação curta: "3. Estima-se a consolidação do quadro na DCB em DD.MM.AAAA." Quesito sobre natureza da incapacidade: "É parcial(grau mínimo) e permanente."
-Caso típico: amputação isolada do 3º, 4º ou 5º quirodáctilo (o quadro 5 exige dois quirodáctilos, ou o 1º/2º isoladamente).
+Usar quando HÁ redução real da capacidade para o trabalho habitual decorrente de acidente, mas a sequela NÃO se enquadra em nenhum quadro do Anexo III. Casos típicos: anquilose ou amputação isolada do 3º, 4º ou 5º quirodáctilo (o quadro 5 exige dois quirodáctilos, ou o 1º/2º isoladamente); limitação articular em grau apenas leve; sequela do dedo mínimo com força de preensão preservada (afasta o quadro 8).
+
+**ATENÇÃO (correção do Dr., laudo Cleiton Graf, 15.07.2026):** o texto antigo deste modelo estava ERRADO. Este modelo USA o parágrafo-ponte boilerplate (NÃO vai "direto após a frase de impacto"), NÃO usa "mínima redução" SOZINHA sem o Art. 86 (com o Art. 86 presente logo abaixo, pode e deve citar o grau leve/mínima, ver regra de 05.08.2026 abaixo) e SEMPRE cita o Art. 86 da Lei 8213/91. O art. 86 é MAIS AMPLO que a lista do Anexo III: qualquer redução da capacidade para o trabalho habitual decorrente de acidente de qualquer natureza dá direito ao auxílio-acidente pelo art. 86, mesmo sem enquadramento no Anexo III. Concluir "não possui enquadramento no Anexo III" SEM o art. 86 soa como negativa indevida do benefício.
+
+Estrutura: P1 a P3 iguais ao Modelo A (fato gerador/CID; tratamento e sequela com "Embora tenha realizado..."; repercussão no trabalho habitual com "Tal sequela gera..."), seguidos do parágrafo-ponte boilerplate ("Com base nas informações obtidas na anamnese durante a expertise médico pericial, ... este avaliador técnico de confiança do Magistrado conclui que:") e, então, destes três blocos, nesta ordem:
+
+> "Embora exista sequela que gera **leve** redução da capacidade laborativa da parte autora, esta não possui enquadramento técnico no Anexo III do Decreto 3048/99 (Relação de situações que dão direito ao Auxílio-acidente)." (Usar **leve** ou **mínima** conforme o caso.)
+
+**REGRA DO DR. (05.08.2026, laudo Damião Galdino):** nos casos de MÍNIMA redução da capacidade (perda de mobilidade de dedo, perda de parte de falange e similares), SEMPRE citar o grau da redução da capacidade laborativa, "leve" ou "mínima", neste bloco do Art. 86. Isto NÃO contradiz a correção de 15.07 (parágrafo ATENÇÃO acima): o que se proibiu foi "mínima redução... não possui enquadramento" SOZINHA, sem o Art. 86 (soava como negativa do benefício); aqui o Art. 86 vem logo abaixo e concede o benefício, então o grau apenas QUALIFICA a redução. Ver [[feedback-incapacidade-parcial-permanente-resposta]].
+
+> "Tal situação, no entanto, se enquadra no Art. 86 da Lei 8213/1991."
+
+> "Art. 86. O auxílio-acidente será concedido, como indenização, ao segurado quando, após consolidação das lesões decorrentes de acidente de qualquer natureza, resultarem seqüelas que impliquem redução da capacidade para o trabalho que habitualmente exercia."
+
+"Dados de interesse pericial:" com os mesmos 3 itens do Modelo A: 1. DID na data do acidente (com "no dia"); 2. incapacidade total e temporária do acidente até a DCB, depois parcial e permanente que não impede o trabalho habitual, porém com maior dificuldade para algumas operações (com "no dia"); 3. consolidação: conceito da ABMLPM + "Estima-se a consolidação do quadro na DCB, em DD.MM.AAAA." (a data da consolidação vai SEM "dia" antes). Quesito sobre natureza da incapacidade: "É parcial e permanente." (acrescentar "grau mínimo" quando a redução for realmente mínima).
+
+**Variante do Modelo 2: sequela anatômica permanente com exame funcional NORMAL** (meniscectomia parcial, reconstrução ligamentar, ressecção óssea, com ADM completa, força 5/5 e manobras negativas). Redação validada no caso Leomar Alves Batista (29.07.2026): a redução é MÍNIMA e se funda na perda anatômica (reserva funcional para esforços intensos), sem afirmar limitação de amplitude ou instabilidade que o exame não mostrou, reconhecendo o bom resultado funcional para não contradizer o exame. ATENÇÃO: há precedente do Dr. em sentido oposto (caso Johann, menisco operado sem sequela = Modelo 5). Em exame normal com benefício contestado, a direção (Modelo 2 com redução mínima x Modelo 3/5 sem redução) é decisão do Dr.: entregar a versão mais defensável pelos achados e DESTACAR a alternativa no resumo, nunca escolher em silêncio. Quando a declaração do assistente da parte divergir do exame do perito, gradar pela clínica própria.
+
+**Sub-tipo: REVISÃO DO DIP de auxílio-acidente já concedido.** O autor já recebe o benefício e pede a retroação do termo inicial. O papel do perito é DATAR a consolidação na DCB do auxílio-doença anterior (ex.: B91 cessado em 31.10.2016) e explicitar que, pelo art. 86, parágrafo 2º, o auxílio-acidente é devido a partir do dia seguinte à cessação do auxílio-doença. O restante da conclusão segue o Modelo 2 ou o Modelo 1 conforme o enquadramento.
 
 ### MODELO 3 — SEM perda de funcionalidade e SEM redução de capacidade (exemplo: LAUDO ELISA)
 Antes da frase-ponte: "Foi realizado o devido tratamento e não restaram limitações funcionais." Frase-núcleo:
@@ -767,10 +1268,42 @@ Antes da frase-ponte: "Foi realizado o devido tratamento e não restaram limita�
 
 Sem "Dados de interesse pericial". Quesitos sobre incapacidade: "Prejudicado".
 
+**Variação: houve incapacidade temporária COM benefício e consolidou sem sequela** (caso Denis Kertzendorff, queimaduras por arco elétrico, 31.07.2026). Omitir os "Dados de interesse pericial" apagaria da conclusão a DID e o afastamento que constam dos autos. INCLUIR um bloco curto, no formato do Modelo 5: 1. DID na data do acidente; 2. incapacidade total e temporária do acidente até a DCB, com consolidação e restituição integral na DCB. SEM o boilerplate ABMLPM de "sequela, um dano permanente", que afirmaria sequela inexistente.
+
+**Sequela apenas ESTÉTICA (cicatriz de queimadura, corte, enxerto em membro):** acrescentar um parágrafo afastando expressamente o quadro 4 do Anexo III, que só enquadra prejuízo estético de grau médio ou máximo em crânio, face ou pescoço; cicatriz leve em segmento de membro não enquadra. Casos de queimadura que curam com cicatriz são arquétipo recorrente.
+
 ### MODELO 4 — Perda de funcionalidade que NÃO gera redução de capacidade laborativa
 Descrever a perda funcional objetivada ao exame (ex.: discreta limitação de amplitude, cicatriz, hipotrofia) e registrar que não interfere nas operações da atividade habitual. Frase-núcleo:
 
 > "O autor possui perda de funcionalidade decorrente da lesão, porém tal perda não gera redução de sua capacidade para o trabalho habitual, não havendo, assim, enquadramento técnico no Anexo III do Decreto 3048/99 (Relação de situações que dão direito ao Auxílio-acidente)."
+
+### MODELO 5 — Consolidação com restituição integral (restitutio ad integrum) + fundamentação científica OBRIGATÓRIA (exemplo: LAUDO TAÍSE, laceração hepática)
+
+Aplica-se sempre que a lesão do acidente CONSOLIDOU-SE com restituição integral, ou seja, o tratamento foi realizado e NÃO restou qualquer limitação funcional ao exame pericial (fratura consolidada sem sequela, luxação reduzida sem sequela, laceração de víscera cicatrizada, TCE leve sem sequela, lesão meniscal ou ligamentar operada com exame atual normal, etc.). É um caso "sem redução da capacidade" (como o Modelo 3), porém com acréscimos obrigatórios definidos pelo Dr. Lino em 01/07/2026:
+
+**Segundo exemplo validado (laudo Johann Buetes Arndt, 29/07/2026):** rotura em alça de balde do menisco lateral do joelho direito (CID S83.2) em atleta profissional de futebol, operada e consolidada sem sequela (exame do joelho inteiramente normal: McMurray, gaveta e Lachman negativos, movimentos completos, força 5/5). Fundamentação com 3 revisões sistemáticas reais do PubMed sobre retorno ao esporte após cirurgia meniscal em atletas de elite (menisco lateral, alto potencial de cicatrização; retorno de 86 a 89% ao nível prévio). Confirma que o Modelo 5 é indexado pelo DESFECHO (consolidação com restituição integral), não pela profissão.
+
+REGRA ABSOLUTA (vale para TODO caso de restitutio ad integrum): antes de redigir, BUSCAR na literatura, usando as ferramentas/APIs do PubMed (mcp__claude_ai_PubMed__*) ou do Consensus (mcp__claude_ai_Consensus__search), evidência científica de que AQUELE TIPO de lesão tem altíssima probabilidade de consolidar SEM limitação funcional. Trazer esses dados como parágrafo técnico na Discussão/Conclusão, fundamentando a ausência de sequela. Nunca inventar referência: usar somente artigos reais retornados pelas ferramentas, com autores, ano e periódico corretos.
+
+1. FUNDAMENTAÇÃO CIENTÍFICA no corpo da conclusão, com CITAÇÃO NUMÉRICA [1], [2], [3] logo após as afirmações.
+2. As REFERÊNCIAS correspondentes vão em NOTA DE RODAPÉ (ao pé da página onde são citadas), NÃO na seção Bibliografia.
+
+Estrutura da Discussão/Conclusão (ver exemplo Taíse):
+- Parágrafo 1: o fato (acidente, lesão, tratamento realizado).
+- Parágrafo 2: evolução com consolidação; exame pericial atual SEM limitações funcionais objetivadas. O retorno à atividade pode ser citado como fato, nunca como o que prova a ausência de sequela (Regra 31).
+- Parágrafo 3 (científico): afirmação técnica sobre a estrutura lesada [1]; "A literatura médica demonstra que [tipo de lesão] evolui com cicatrização/consolidação ... [2], com retorno pleno às atividades habituais ... [3]. Trata-se, portanto, de lesão com altíssima probabilidade de consolidação sem sequela funcional, o que se confirma no presente caso."
+- Parágrafo 4 (núcleo, igual ao Modelo 3): "... não possui lesão ou sequela que possa ser classificada como incapacitante ou que reduza sua capacidade para o trabalho habitual, não havendo, assim, enquadramento técnico no Anexo III do Decreto 3048/99 (Relação de situações que dão direito ao Auxílio-acidente)."
+- "Dados de interesse pericial:" 1. DID na data do acidente; 2. consolidação estimada na DCB, compatível com o tempo de cicatrização descrito na literatura.
+
+Quesitos: mesmo padrão dos Modelos 3/4 (Regra 23), só 2.7 e 4.1 marcadas; quesitos de incapacidade "Prejudicado"; Q8 com as duas opções coladas à pergunta e "Resposta: Prejudicado."; Q10/Q11 caixas coladas.
+
+COMO GERAR AS NOTAS DE RODAPÉ (o gerar_conclusao_odt.py não faz nota de rodapé nativamente):
+- No texto da conclusão, deixar os marcadores [1], [2], [3] inline.
+- Após rodar o gerar_conclusao_odt.py, pós-processar o content.xml do ODT (o documento já traz text:notes-configuration com text:footnotes-position="page"). Substituir cada marcador " [n]" por:
+  <text:note text:id="ftnN" text:note-class="footnote"><text:note-citation>N</text:note-citation><text:note-body><text:p text:style-name="Nota_Rodape">REFERÊNCIA</text:p></text:note-body></text:note>
+  definindo o estilo Nota_Rodape (Arial 10pt, justificado) em office:automatic-styles. Re-zipar cru (mimetype primeiro).
+- Recontar as folhas (as notas podem acrescentar uma página) e atualizar "N (por extenso) folhas" nas Considerações finais.
+
 
 ### ANEXO III DO DECRETO 3048/99 — RESUMO PARA ENQUADRAMENTO
 
@@ -786,7 +1319,25 @@ Descrever a perda funcional objetivada ao exame (ex.: discreta limitação de am
 
 ### CORREÇÕES CONFIRMADAS PELO DR. LINO (12.06.2026)
 1. Citar SEMPRE o quadro e a alínea corretos do Anexo III oficial (laudos antigos citavam "quadro 6" para perda de segmento de dedo; o correto é o quadro 5 — Perdas de segmentos de membros).
-2. O LAUDO VALDIR contém erro ("se enquadra no quadro 6") — amputação isolada do 5º quirodáctilo NÃO se enquadra no Anexo III; o exemplo correto do modelo 2 é o LAUDO ADEMAR.
+2. O LAUDO VALDIR contém erro ("se enquadra no quadro 6") — amputação ou anquilose isolada do 5º quirodáctilo NÃO se enquadra no Anexo III. Nesses casos de redução SEM Anexo III, o exemplo VALIDADO é o LAUDO CLEITON GRAF (Modelo 2 COM Art. 86 da Lei 8213/91). O antigo LAUDO ADEMAR não citava o art. 86 e não deve mais ser usado como referência do Modelo 2 (atualizado em 15.07.2026).
 
 ### CONVENÇÃO DE COMANDO
 Dr. Lino pode indicar o modelo diretamente no comando (ex.: "conclusao1 modelo 2") — usar o modelo indicado sem questionar. No modelo 1, mesmo com modelo indicado, identificar e citar SEMPRE o quadro e a alínea corretos do Anexo III conforme a lesão. Se o modelo não for indicado, classificar pelo exame físico/autos e informar qual modelo foi aplicado; em dúvida entre dois modelos, perguntar antes.
+
+
+## Estilo de redação (regra transversal do Dr. Lino)
+
+Vale para TODO texto que esta skill produz (laudo, parecer, conclusão, quesitos, manifestação):
+
+- Escrever POUCO por parágrafo e dar um leve espaçamento entre eles. Texto longo e corrido não é lido. Um raciocínio por parágrafo, parágrafos curtos, com linha em branco entre os blocos.
+- CÁLCULOS sempre espaçados, passo a passo (cada etapa em sua linha), e com o RESULTADO em NEGRITO ao final.
+- FECHAR cada item/argumento com uma frase conclusiva, curta e em NEGRITO, que crava o ponto: "Portanto, fica bem claro que a valoração correta é de XXXX." / "Como pode ser visto, o Expert errou nesse ponto." O leitor tem de sair de cada item sabendo exatamente a conclusão.
+
+
+## Regras de redação padronizadas (Dr. Lino — 16.07.2026)
+
+Valem para todo texto produzido por este skill (laudos, pré-laudos, pareceres, conclusões e quesitos):
+
+- **Datas com ponto:** escrever sempre no formato 16.05.2019, nunca 16/05/2019. É a preferência do Dr. (ele usa o ponto, não a barra).
+- **Moto, não motocicleta:** usar o termo "moto" (mais coloquial); nunca "motocicleta".
+- **Ordem cronológica crescente nas tabelas (pré-laudos):** as tabelas de exames, de documentos/atestados, de benefícios e de vínculos empregatícios (CNIS) saem sempre do mais antigo (no topo) para o mais recente (no fim). Os geradores de pré-laudo já ordenam e convertem as datas para o ponto automaticamente; ao montar o JSON, informar os itens já em ordem crescente.
